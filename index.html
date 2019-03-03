@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Street View Base</title>
+    <meta charset="utf-8">
+    <style>
+      #map {
+        height: 100%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var node = {
+        pano00: [{
+          heading: 180,
+          pano: 'pano01',
+        }],
+        pano01: [{
+          heading: 0,
+          pano: 'pano00',
+        }, {
+          heading: 180,
+          pano: 'pano02',
+        }],
+        pano02: [{
+          heading: 0,
+          pano: 'pano01',
+        }],
+      };
+
+      function initPano() {
+        var panorama = new google.maps.StreetViewPanorama(
+            document.getElementById('map'), {pano: 'pano00', visible: true});
+        panorama.registerPanoProvider(getCustomPanorama);
+      }
+
+      function getCustomPanoramaTileUrl(pano) {
+        return './' + pano + '.png'
+      }
+
+      function getCustomPanorama(pano) {
+        return {
+          location: {
+            pano: pano,
+            description: 'Custom street view'
+          },
+          /* 場所の移動をしたいときは次の行のコメントアウトをはずして、 pano01.png, pano02.png を用意する
+           * When you want to move in street view, you need to commentout next line and arrange pano01.png, pano02.png
+           */
+          // links: node[pano], 
+          copyright: 'add your name',
+          tiles: {
+            tileSize: new google.maps.Size(4096, 4096),
+            worldSize: new google.maps.Size(4096, 2050),
+            centerHeading: 0,
+            getTileUrl: getCustomPanoramaTileUrl
+          }
+        };
+      }
+      function initPanorama() {
+        panorama = new google.maps.StreetViewPanorama(
+            document.getElementById('street-view'),
+            {pano: outsideGoogle.location.pano}
+        );
+        panorama.registerPanoProvider(function(pano) {
+          return getCustomPanorama(pano);
+        });
+      }
+    </script>
+    <!-- GoogleのAPIキーを https://developers.google.com/maps/documentation/javascript/get-api-key#quick-guide から発行して
+         次の行の &key= の後ろに &key=xxxxxxxx のように入れる -->
+    <!-- please get api key from https://developers.google.com/maps/documentation/javascript/get-api-key#quick-guide
+         and add key after '&key=' in next line. ex: js?callback=initPano&key=abcdefgYourMapPlatformApiKeyxyzzzz -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?callback=initPano&key="></script>
+  </body>
+</html>
